@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");  // Ganti bcrypt dengan bcryptjs
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
@@ -23,7 +23,7 @@ const register = (req, res) => {
       return res.status(400).json({ message: "Email sudah digunakan." });
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = bcrypt.hashSync(password, 10);  // Menggunakan bcryptjs
     const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
     
     db.query(sql, [username, email, hashedPassword], (err, result) => {
@@ -54,7 +54,7 @@ const login = (req, res) => {
     }
 
     const user = results[0];
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    const isPasswordValid = bcrypt.compareSync(password, user.password);  // Menggunakan bcryptjs
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Password salah." });
@@ -84,13 +84,13 @@ const resetPassword = (req, res) => {
     }
 
     const user = results[0];
-    const isOldPasswordValid = bcrypt.compareSync(oldPassword, user.password);
+    const isOldPasswordValid = bcrypt.compareSync(oldPassword, user.password);  // Menggunakan bcryptjs
 
     if (!isOldPasswordValid) {
       return res.status(401).json({ message: "Password lama salah." });
     }
 
-    const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+    const hashedNewPassword = bcrypt.hashSync(newPassword, 10);  // Menggunakan bcryptjs
     const updatePasswordSql = "UPDATE users SET password = ? WHERE email = ?";
     db.query(updatePasswordSql, [hashedNewPassword, email], (updateErr) => {
       if (updateErr) {
@@ -139,7 +139,7 @@ const resetEmail = (req, res) => {
       }
 
       const user = results[0];
-      const isPasswordValid = bcrypt.compareSync(password, user.password);
+      const isPasswordValid = bcrypt.compareSync(password, user.password);  // Menggunakan bcryptjs
 
       if (!isPasswordValid) {
         return res.status(401).json({ message: "Password salah." });
@@ -159,10 +159,9 @@ const resetEmail = (req, res) => {
   });
 };
 
-
 module.exports = {
   register,
   login,
   resetPassword,
   resetEmail,
-}; 
+};
