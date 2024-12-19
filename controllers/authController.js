@@ -1,7 +1,13 @@
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const crypto = require("crypto"); // Import modul crypto
+
 const JWT_SECRET = process.env.JWT_SECRET || "avagfarvaaebrbea"; 
+
+// Fungsi untuk hash password menggunakan SHA-256
+const hashPassword = (password) => {
+  return crypto.createHash('sha256').update(password).digest('hex');
+};
 
 // Registrasi
 exports.register = (req, res) => {
@@ -21,7 +27,7 @@ exports.register = (req, res) => {
       return res.status(400).json({ message: "Email sudah digunakan." });
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = hashPassword(password); // Hash password menggunakan crypto
     const sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
     
     db.query(sql, [username, email, hashedPassword], (err) => {
@@ -52,9 +58,8 @@ exports.login = (req, res) => {
     }
 
     const user = results[0];
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
-
-    if (!isPasswordValid) {
+    const hashedPassword = hashPassword(password); // Hash password inputan user
+    if (hashedPassword !== user.password) {
       return res.status(401).json({ message: "Password salah." });
     }
 
